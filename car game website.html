@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NitroBoost Web Edition</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        #game-container {
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            background-color: #222;
+        }
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ff3333;
+            font-family: monospace;
+            font-size: 16px;
+            pointer-events: none;
+            line-height: 1.5;
+        }
+        .stat-val {
+            color: #00ffcc;
+            font-weight: bold;
+        }
+        #controls-hint {
+            margin-top: 15px;
+            color: #aaa;
+            font-size: 14px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div id="hud">
+            <div>GEAR: <span id="hud-gear" class="stat-val">0</span> / 7</div>
+            <div>SPEED: <span id="hud-speed" class="stat-val">0.00</span></div>
+            <div>MAX SPEED: <span id="hud-max" class="stat-val">0</span></div>
+        </div>
+    </div>
+
+    <div id="controls-hint">
+        <strong>Controls:</strong> W = Accelerate | S = Reverse | A/D = Steer | UP/DOWN Arrows = Shift Gears | SPACE = Nitro
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // HUD Elements
+        const hudGear = document.getElementById('hud-gear');
+        const hudSpeed = document.getElementById('hud-speed');
+        const hudMax = document.getElementById('hud-max');
+
+        // =====================
+        // LOAD GAME IMAGES
+        // =====================
+        const trackImage = new Image();
+        trackImage.src = 'Racing Track.png'; // Make sure this is in the same folder
+
+        const carImage = new Image();
+        carImage.src = 'CAR.png'; // Make sure this is in the same folder
+
+        // =====================
+        // CAR & GAME VARIABLES
+        // =====================
+        let gear = 0;
+        const maxgear = 7;
+        const mingear = 0;
+        
+        let car_x = 400;
+        let car_y = 267;
+        let angle = 0; 
+        let speed = 0;
+
+        const acceleration = 8.50;
+        let max_forward_speed = 0;
+        const max_reverse_speed = 2;
+        const friction = 0.75;
+
+        const keys = {};
+
+        window.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+            
+            if (e.key === 'ArrowUp') {
+                if (gear < maxgear) gear++;
+            }
+            if (e.key === 'ArrowDown') {
+                if (gear > mingear) gear--;
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+
+        // =====================
+        // RENDER IMAGE CAR
+        // =====================
+        function drawCar(x, y, degrees) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(-degrees * Math.PI / 180); // Match Pygame rotation direction
+
+            // Draws your CAR.png image centered at 20x10 scale matching your Pygame script
+            if (carImage.complete) {
+                ctx.drawImage(carImage, -10, -5, 20, 10);
+            }
+            ctx.restore();
+        }
+
+        // =====================
+        // GAME PHYSICS LOOP
+        // =====================
+        function gameLoop() {
+            if (keys['w'] || keys['W']) speed += acceleration;
+            if (keys['s'] || keys['S']) speed -= acceleration;
+
+            if (Math.abs(speed) >= 2) {
+                if (keys['a'] || keys['A']) angle += 13;
+                if (keys['d'] || keys['D']) angle -= 13;
+            }
+
+            if (keys[' ']) speed *= 1.5;
+
+            switch(gear) {
+                case 0: max_forward_speed = 0; break;
+                case 1: max_forward_speed = 20; break;
+                case 2: max_forward_speed = 40; break;
+                case 3: max_forward_speed = 60; break;
+                case 4: max_forward_speed = 80; break;
+                case 5: max_forward_speed = 100; break;
+                case 6: max_forward_speed = 120; break;
+                case 7: max_forward_speed = 300; break;
+            }
+
+            if (speed > max_forward_speed) speed = max_forward_speed;
+            if (speed < -max_reverse_speed) speed = -max_reverse_speed;
+
+            speed *= friction;
+
+            const radians = angle * Math.PI / 180;
+            car_x += speed * Math.cos(radians);
+            car_y -= speed * Math.sin(radians);
+
+            if (car_x > canvas.width) car_x = 0;
+            if (car_x < 0) car_x = canvas.width;
+            if (car_y > canvas.height) car_y = 0;
+            if (car_y < 0) car_y = canvas.height;
+
+            hudGear.textContent = gear;
+            hudSpeed.textContent = speed.toFixed(2);
+            hudMax.textContent = max_forward_speed;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw the track background image scaled to the screen dimensions
+            if (trackImage.complete) {
+                ctx.drawImage(trackImage, 0, 0, canvas.width, canvas.height);
+            }
+
+            drawCar(car_x, car_y, angle);
+
+            setTimeout(() => {
+                requestAnimationFrame(gameLoop);
+            }, 1000 / 15);
+        }
+
+        // Run game loop once images begin to load
+        trackImage.onload = carImage.onload = () => {
+            // Safely prevents multi-triggering loop initialization
+            if(!window.gameStarted) {
+                window.gameStarted = true;
+                gameLoop();
+            }
+        };
+    </script>
+</body>
+</html>
