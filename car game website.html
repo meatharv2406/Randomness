@@ -140,7 +140,7 @@
         </div>
     </div>
 
-    <script>
+       <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -149,10 +149,10 @@
         const hudMax = document.getElementById('hud-max');
 
         // =====================
-        // LOAD GAME IMAGES (Fixed for Mobile URLs)
+        // LOAD GAME IMAGES
         // =====================
         const trackImage = new Image();
-        trackImage.src = 'Racing%20Track.png'; // Web encoded space strings
+        trackImage.src = 'Racing%20Track.png'; 
 
         const carImage = new Image();
         carImage.src = 'CAR.png'; 
@@ -174,7 +174,7 @@
         const max_reverse_speed = 2;
         const friction = 0.75;
 
-        // Unified control state
+        // Unified control state mapping
         const controls = {
             forward: false,
             reverse: false,
@@ -184,7 +184,7 @@
         };
 
         // =====================
-        // KEYBOARD LISTENERS
+        // KEYBOARD LISTENERS (Fixed Crashes)
         // =====================
         window.addEventListener('keydown', (e) => {
             if (e.key === 'w' || e.key === 'W') controls.forward = true;
@@ -206,14 +206,14 @@
         });
 
         // ===================================
-        // TRUE MULTI-TOUCH GLOBAL ENGINE (Fixed)
+        // MOBILE MULTI-TOUCH STABILIZATION
         // ===================================
         const allButtons = document.querySelectorAll('.btn');
 
         function processTouches(e) {
-            e.preventDefault(); // Stop mobile scrolling/zooming gestures completely
+            e.preventDefault(); 
             
-            // Reset continuous control states before reading active touches
+            // Clear prior frames to prevent layout sticking
             controls.forward = false;
             controls.reverse = false;
             controls.left = false;
@@ -222,7 +222,7 @@
             
             allButtons.forEach(btn => btn.classList.remove('active-touch'));
 
-            // Look through every single individual finger touching the screen
+            // Track individual finger positions over the control area
             for (let i = 0; i < e.touches.length; i++) {
                 const element = document.elementFromPoint(e.touches[i].clientX, e.touches[i].clientY);
                 if (!element) continue;
@@ -238,14 +238,12 @@
             }
         }
 
-        // Bind multi-touch processing globally to the container
         const touchArea = document.getElementById('touch-controls');
         touchArea.addEventListener('touchstart', processTouches, { passive: false });
         touchArea.addEventListener('touchmove', processTouches, { passive: false });
         touchArea.addEventListener('touchend', processTouches, { passive: false });
         touchArea.addEventListener('touchcancel', processTouches, { passive: false });
 
-        // Handle single tap actions (Gear Shifting) cleanly
         document.getElementById('btn-up').addEventListener('touchstart', (e) => { e.preventDefault(); shiftGear(1); }, { passive: false });
         document.getElementById('btn-down').addEventListener('touchstart', (e) => { e.preventDefault(); shiftGear(-1); }, { passive: false });
 
@@ -256,7 +254,7 @@
         }
 
         // =====================
-        // RENDER IMAGE CAR
+        // CAR RENDERING PIPELINE
         // =====================
         function drawCar(x, y, degrees) {
             ctx.save();
@@ -266,15 +264,14 @@
             if (carImage.complete && carImage.naturalWidth !== 0) {
                 ctx.drawImage(carImage, -10, -5, 20, 10);
             } else {
-                // Red rectangle fallback if the image completely missing from directory
-                ctx.fillStyle = '#ff2a2a';
+                ctx.fillStyle = '#ff2a2a'; // Red backup block
                 ctx.fillRect(-10, -5, 20, 10);
             }
             ctx.restore();
         }
 
         // =====================
-        // GAME PHYSICS LOOP
+        // MAIN PHYSICS LOOP
         // =====================
         function gameLoop() {
             if (controls.forward) speed += acceleration;
@@ -282,3 +279,56 @@
 
             if (Math.abs(speed) >= 2) {
                 if (controls.left) angle += 13;
+                if (controls.right) angle -= 13;
+            }
+
+            if (controls.nitro) speed *= 1.5;
+
+            switch(gear) {
+                case 0: max_forward_speed = 0; break;
+                case 1: max_forward_speed = 20; break;
+                case 2: max_forward_speed = 40; break;
+                case 3: max_forward_speed = 60; break;
+                case 4: max_forward_speed = 80; break;
+                case 5: max_forward_speed = 100; break;
+                case 6: max_forward_speed = 120; break;
+                case 7: max_forward_speed = 300; break;
+            }
+
+            if (speed > max_forward_speed) speed = max_forward_speed;
+            if (speed < -max_reverse_speed) speed = -max_reverse_speed;
+
+            speed *= friction;
+
+            const radians = angle * Math.PI / 180;
+            car_x += speed * Math.cos(radians);
+            car_y -= speed * Math.sin(radians);
+
+            if (car_x > canvas.width) car_x = 0;
+            if (car_x < 0) car_x = canvas.width;
+            if (car_y > canvas.height) car_y = 0;
+            if (car_y < 0) car_y = canvas.height;
+
+            hudGear.textContent = gear;
+            hudSpeed.textContent = speed.toFixed(2);
+            hudMax.textContent = max_forward_speed;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (trackImage.complete && trackImage.naturalWidth !== 0) {
+                ctx.drawImage(trackImage, 0, 0, canvas.width, canvas.height);
+            } else {
+                ctx.fillStyle = '#2d7a34'; // Green background fallback
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            drawCar(car_x, car_y, angle);
+
+            setTimeout(() => {
+                requestAnimationFrame(gameLoop);
+            }, 1000 / 15);
+        }
+
+        // Boot system loop directly
+        gameLoop();
+    </script>
