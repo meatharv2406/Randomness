@@ -2,13 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>NitroBoost Web Edition</title>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
         }
         body {
             background-color: #1a1a1a;
@@ -26,33 +29,88 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             border-radius: 4px;
             overflow: hidden;
+            width: 800px;
+            height: 600px;
+            max-width: 100vw;
+            max-height: 75vh;
         }
         canvas {
             display: block;
             background-color: #222;
+            width: 100%;
+            height: 100%;
         }
         #hud {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 15px;
+            top: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.75);
+            padding: 10px 15px;
             border-radius: 8px;
             border-left: 4px solid #ff3333;
             font-family: monospace;
-            font-size: 16px;
+            font-size: 14px;
             pointer-events: none;
-            line-height: 1.5;
+            line-height: 1.4;
+            z-index: 10;
         }
         .stat-val {
             color: #00ffcc;
             font-weight: bold;
         }
-        #controls-hint {
-            margin-top: 15px;
-            color: #aaa;
+        
+        /* Touch Controls Layer */
+        #touch-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+            padding: 10px 20px;
+            margin-top: 10px;
+        }
+        .control-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .btn {
+            background: #2a2a2a;
+            color: white;
+            border: 2px solid #444;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-weight: bold;
+            font-size: 18px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: none;
+        }
+        .btn:active {
+            background: #ff3333;
+            border-color: #ff6666;
+        }
+        .btn-rect {
+            border-radius: 8px;
+            width: 75px;
+            height: 50px;
             font-size: 14px;
-            text-align: center;
+        }
+        .btn-nitro {
+            background: #9b59b6;
+            border-color: #8e44ad;
+        }
+        .btn-nitro:active {
+            background: #e74c3c;
+        }
+        
+        /* Hide touch controls entirely if someone plays on a desktop computer */
+        @media (hover: hover) and (pointer: fine) {
+            #touch-controls {
+                margin-top: 15px;
+            }
         }
     </style>
 </head>
@@ -67,15 +125,32 @@
         </div>
     </div>
 
-    <div id="controls-hint">
-        <strong>Controls:</strong> W = Accelerate | S = Reverse | A/D = Steer | UP/DOWN Arrows = Shift Gears | SPACE = Nitro
+    <!-- Touch Control Interface Layout -->
+    <div id="touch-controls">
+        <!-- Steering Group (Left Side) -->
+        <div class="control-group">
+            <button class="btn" id="btn-left">◀</button>
+            <button class="btn" id="btn-right">▶</button>
+        </div>
+        
+        <!-- Gears & Nitro (Middle) -->
+        <div class="control-group">
+            <button class="btn btn-rect" id="btn-down">GEAR -</button>
+            <button class="btn btn-rect btn-nitro" id="btn-nitro">NITRO</button>
+            <button class="btn btn-rect" id="btn-up">GEAR +</button>
+        </div>
+        
+        <!-- Pedals Group (Right Side) -->
+        <div class="control-group">
+            <button class="btn" id="btn-reverse">S</button>
+            <button class="btn" id="btn-drive">W</button>
+        </div>
     </div>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // HUD Elements
         const hudGear = document.getElementById('hud-gear');
         const hudSpeed = document.getElementById('hud-speed');
         const hudMax = document.getElementById('hud-max');
@@ -84,10 +159,10 @@
         // LOAD GAME IMAGES
         // =====================
         const trackImage = new Image();
-        trackImage.src = 'Racing Track.png'; // Make sure this is in the same folder
+        trackImage.src = 'Racing Track.png'; 
 
         const carImage = new Image();
-        carImage.src = 'CAR.png'; // Make sure this is in the same folder
+        carImage.src = 'CAR.png'; 
 
         // =====================
         // CAR & GAME VARIABLES
@@ -106,22 +181,61 @@
         const max_reverse_speed = 2;
         const friction = 0.75;
 
-        const keys = {};
+        // Unified control state for both keyboard and touch
+        const controls = {
+            forward: false,
+            reverse: false,
+            left: false,
+            right: false,
+            nitro: false
+        };
 
+        // =====================
+        // KEYBOARD LISTENERS
+        // =====================
         window.addEventListener('keydown', (e) => {
-            keys[e.key] = true;
+            if (e.key === 'w' || e.key === 'W') controls.forward = true;
+            if (e.key === 's' || e.key === 'S') controls.reverse = true;
+            if (e.key === 'a' || e.key === 'A') controls.left = true;
+            if (e.key === 'd' || e.key === 'D') controls.right = true;
+            if (e.key === ' ') controls.nitro = true;
             
-            if (e.key === 'ArrowUp') {
-                if (gear < maxgear) gear++;
-            }
-            if (e.key === 'ArrowDown') {
-                if (gear > mingear) gear--;
-            }
+            if (e.key === 'ArrowUp') shiftGear(1);
+            if (e.key === 'ArrowDown') shiftGear(-1);
         });
 
         window.addEventListener('keyup', (e) => {
-            keys[e.key] = false;
+            if (e.key === 'w' || e.key === 'W') controls.forward = false;
+            if (e.key === 's' || e.key === 'S') controls.reverse = false;
+            if (e.key === 'a' || e.key === 'A') controls.left = false;
+            if (e.key === 'd' || e.key === 'D') controls.right = false;
+            if (e.key === ' ') controls.nitro = false;
         });
+
+        // =====================
+        // TOUCH LISTENERS
+        // =====================
+        function setupTouchBtn(id, property) {
+            const btn = document.getElementById(id);
+            btn.addEventListener('touchstart', (e) => { e.preventDefault(); controls[property] = true; });
+            btn.addEventListener('touchend', (e) => { e.preventDefault(); controls[property] = false; });
+        }
+
+        setupTouchBtn('btn-drive', 'forward');
+        setupTouchBtn('btn-reverse', 'reverse');
+        setupTouchBtn('btn-left', 'left');
+        setupTouchBtn('btn-right', 'right');
+        setupTouchBtn('btn-nitro', 'nitro');
+
+        // Gear shifts trigger immediately on touch tap
+        document.getElementById('btn-up').addEventListener('touchstart', (e) => { e.preventDefault(); shiftGear(1); });
+        document.getElementById('btn-down').addEventListener('touchstart', (e) => { e.preventDefault(); shiftGear(-1); });
+
+        function shiftGear(direction) {
+            gear += direction;
+            if (gear > maxgear) gear = maxgear;
+            if (gear < mingear) gear = mingear;
+        }
 
         // =====================
         // RENDER IMAGE CAR
@@ -129,9 +243,8 @@
         function drawCar(x, y, degrees) {
             ctx.save();
             ctx.translate(x, y);
-            ctx.rotate(-degrees * Math.PI / 180); // Match Pygame rotation direction
+            ctx.rotate(-degrees * Math.PI / 180); 
 
-            // Draws your CAR.png image centered at 20x10 scale matching your Pygame script
             if (carImage.complete) {
                 ctx.drawImage(carImage, -10, -5, 20, 10);
             }
@@ -142,15 +255,15 @@
         // GAME PHYSICS LOOP
         // =====================
         function gameLoop() {
-            if (keys['w'] || keys['W']) speed += acceleration;
-            if (keys['s'] || keys['S']) speed -= acceleration;
+            if (controls.forward) speed += acceleration;
+            if (controls.reverse) speed -= acceleration;
 
             if (Math.abs(speed) >= 2) {
-                if (keys['a'] || keys['A']) angle += 13;
-                if (keys['d'] || keys['D']) angle -= 13;
+                if (controls.left) angle += 13;
+                if (controls.right) angle -= 13;
             }
 
-            if (keys[' ']) speed *= 1.5;
+            if (controls.nitro) speed *= 1.5;
 
             switch(gear) {
                 case 0: max_forward_speed = 0; break;
@@ -183,26 +296,7 @@
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw the track background image scaled to the screen dimensions
             if (trackImage.complete) {
                 ctx.drawImage(trackImage, 0, 0, canvas.width, canvas.height);
             }
 
-            drawCar(car_x, car_y, angle);
-
-            setTimeout(() => {
-                requestAnimationFrame(gameLoop);
-            }, 1000 / 15);
-        }
-
-        // Run game loop once images begin to load
-        trackImage.onload = carImage.onload = () => {
-            // Safely prevents multi-triggering loop initialization
-            if(!window.gameStarted) {
-                window.gameStarted = true;
-                gameLoop();
-            }
-        };
-    </script>
-</body>
-</html>
