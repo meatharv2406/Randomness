@@ -11,7 +11,7 @@
             padding: 0;
             user-select: none;
             -webkit-user-select: none;
-            touch-action: none;
+            touch-action: auto;
         }
         body {
             background-color: #1a1a1a;
@@ -32,7 +32,7 @@
             overflow: hidden;
             width: 800px;
             height: 600px;
-            max-width: 98vw;
+            max-width: 125vw;
             max-height: 65vh; /* Increased from 55vh to make the canvas window bigger */
         }
         canvas {
@@ -66,13 +66,13 @@
             justify-content: space-between; /* Pushes the left, middle, and right clusters as far apart as possible */
             align-items: center;
             width: 100%;
-            max-width: 850px; /* Wider container area to spread the clusters out */
+            max-width: 950px; /* Wider container area to spread the clusters out */
             padding: 10px 25px; /* Adds extra padding to the outer edges */
             margin-top: 10px;
         }
         .control-group {
             display: flex;
-            gap: 20px; /* Increased from 10px to space out individual buttons inside each group */
+            gap: 50px; /* Increased from 10px to space out individual buttons inside each group */
             align-items: center;
         }
         .btn {
@@ -80,8 +80,8 @@
             color: white;
             border: 2px solid #444;
             border-radius: 50%;
-            width: 65px; /* Circular button dimensions */
-            height: 65px;
+            width: 120px; /* Circular button dimensions */
+            height: 120px;
             font-weight: bold;
             font-size: 22px;
             display: flex;
@@ -97,15 +97,15 @@
         /* GEAR & NITRO SIZE INCREASE CONFIGURATION */
         .btn-rect {
             border-radius: 12px;
-            width: 95px;  /* Increased from 70px to make them much wider */
-            height: 55px; /* Increased from 45px to make them taller */
-            font-size: 14px;
+            width: 145px;  /* Increased from 70px to make them much wider */
+            height: 60px; /* Increased from 45px to make them taller */
+            font-size: 16px;
         }
         .btn-nitro {
             background: #9b59b6;
             border-color: #8e44ad;
-            width: 110px; /* Nitro gets a slightly larger standout width boost */
-            height: 60px; /* Taller height baseline for clear thumb positioning */
+            width: 175px; /* Nitro gets a slightly larger standout width boost */
+            height: 70px; /* Taller height baseline for clear thumb positioning */
             font-size: 15px;
         }
         .btn-nitro.active-touch {
@@ -218,7 +218,6 @@
         const allButtons = document.querySelectorAll('.btn');
 
         function processTouches(e) {
-            e.preventDefault(); 
             
             // Clear prior frames to prevent layout sticking
             controls.forward = false;
