@@ -86,11 +86,11 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 100vw;
+    width: 100%;
     max-width: none;
-    gap: 24px;
+    gap: 0;
     margin: 0;
-    padding: 0 24px;
+    padding: 0;
     flex-shrink: 0;
     touch-action: none;
 }
@@ -98,9 +98,17 @@
 .control-group {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: clamp(28px, 4vw, 55px);
-    min-width: 0;
+    gap: 24px;
+    flex-shrink: 0;
+}
+
+/* Align the outer buttons with the canvas edges */
+#touch-controls .control-group:first-child {
+    margin-left: max(0px, calc((100vw - 1000px) / 2));
+}
+
+#touch-controls .control-group:last-child {
+    margin-right: max(0px, calc((100vw - 1000px) / 2));
 }
 
         .btn {
