@@ -6,8 +6,8 @@
     <title>NitroBoost Web Edition</title>
             <style>
         :root {
-            --control-size: clamp(48px, 8.5vmin, 76px);
-            --control-gap: clamp(8px, 2vw, 22px);
+            --control-size: clamp(55px, 9vmin, 80px);
+            --control-gap: clamp(10px, 2.5vw, 25px);
         }
 
         * {
@@ -126,15 +126,15 @@
         }
 
         .btn-rect {
-            width: clamp(64px, 10vw, 112px);
-            height: clamp(44px, 7.5vmin, 58px);
+            width: clamp(66px, 10.5vw, 115px);
+            height: clamp(46px, 8vmin, 60px);
             border-radius: 10px;
             font-size: clamp(11px, 1.8vmin, 15px);
         }
 
         .btn-nitro {
-            width: clamp(76px, 12vw, 132px);
-            height: clamp(48px, 8vmin, 64px);
+            width: clamp(77.5px, 12.5vw, 135px);
+            height: clamp(50px, 8.5vmin, 70px);
             border-radius: 12px;
             background: #9b59b6;
             border-color: #8e44ad;
@@ -146,46 +146,62 @@
         }
 
         /* Landscape phones and compact tablets: keep controls in one row. */
-        @media (orientation: landscape) and (max-height: 520px) {
-            body {
-                display: grid;
-                grid-template-columns: minmax(0, 1fr);
-                justify-items: center;
-                gap: 6px;
-                padding: 6px 10px;
-            }
+       @media (orientation: landscape) and (max-height: 520px) {
+    body {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        touch-action: pan-y;
+    }
 
-            #game-container {
-                width: min(100%, calc((100dvh - 130px) * 4 / 3));
-                max-height: calc(100dvh - 120px);
-            }
+    #game-container {
+        width: min(100%, calc((100dvh - 130px) * 4 / 3));
+        max-height: calc(100dvh - 120px);
+        flex-shrink: 0;
+    }
 
-            #touch-controls {
-                gap: clamp(6px, 1.5vw, 18px);
-                margin: 0 auto 4px;
-            }
+    #touch-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        max-width: none;
+        gap: 24px;
+        margin: 0 auto 12px;
+        padding: 0 12px;
+        flex-shrink: 0;
+        touch-action: none;
+    }
 
-            .control-group {
-                gap: clamp(5px, 1.2vw, 14px);
-            }
+    .control-group {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        flex-shrink: 0;
+    }
 
-            :root {
-                --control-size: clamp(42px, 11vh, 58px);
-            }
+    :root {
+        --control-size: 76px;
+    }
 
-            .btn-rect {
-                width: clamp(58px, 9vw, 86px);
-                height: clamp(36px, 8vh, 46px);
-                font-size: 11px;
-            }
+    .btn-rect {
+        width: 100px;
+        height: 56px;
+        font-size: 13px;
+    }
 
-            .btn-nitro {
-                width: clamp(68px, 10vw, 96px);
-                height: clamp(40px, 9vh, 50px);
-                font-size: 11px;
-            }
-        }
-
+    .btn-nitro {
+        width: 120px;
+        height: 64px;
+        font-size: 14px;
+    }
+}
         /* Very narrow screens: wrap the groups instead of squeezing buttons. */
         @media (max-width: 560px) and (orientation: portrait) {
             #game-container {
