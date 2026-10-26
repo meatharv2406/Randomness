@@ -82,26 +82,26 @@
             font-weight: bold;
         }
 
-        #touch-controls {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-            align-items: center;
-            justify-content: space-between;
-            gap: var(--control-gap);
-            width: min(100%, 1000px);
-            margin: 4px auto 10px;
-            padding: 0 2px;
-            flex: 0 0 auto;
-            touch-action: none;
-        }
+       #touch-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100vw;
+    max-width: none;
+    gap: 24px;
+    margin: 0;
+    padding: 0 24px;
+    flex-shrink: 0;
+    touch-action: none;
+}
 
-        .control-group {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: var(--control-gap);
-            min-width: 0;
-        }
+.control-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+    flex-shrink: 0;
+}
 
         .btn {
             display: flex;
