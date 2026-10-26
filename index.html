@@ -97,10 +97,10 @@
 
 .control-group {
     display: flex;
-    justify-content: center;
     align-items: center;
-    gap: 24px;
-    flex-shrink: 0;
+    justify-content: center;
+    gap: clamp(28px, 4vw, 55px);
+    min-width: 0;
 }
 
         .btn {
@@ -144,6 +144,10 @@
         .btn-nitro.active-touch {
             background: #e74c3c;
         }
+                #touch-controls .control-group:first-child,
+#touch-controls .control-group:last-child {
+    gap: clamp(32px, 5vw, 65px);
+}
 
         /* Landscape phones and compact tablets: keep controls in one row. */
        @media (orientation: landscape) and (max-height: 520px) {
