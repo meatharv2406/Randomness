@@ -415,7 +415,7 @@
         // MAIN PHYSICS LOOP
         // =====================
         function gameLoop() {
-            if (controls.forward) speed *= acceleration;
+            if (controls.forward) speed += acceleration;
             if (controls.reverse) speed -= acceleration;
 
             if (Math.abs(speed) >= 2) {
@@ -423,7 +423,7 @@
                 if (controls.right) angle -= 13;
             }
 
-            if (controls.nitro) speed *= 1.5;
+            if (controls.nitro) speed *= 2.0;
 
             switch(gear) {
                 case 0: max_forward_speed = 0; break;
