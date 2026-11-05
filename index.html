@@ -296,12 +296,6 @@
         const trackImage = new Image();
         const carImage = new Image();
 
-        trackImage.onload = () => console.log("TRACK LOADED!");
-        trackImage.onerror = () => console.log("TRACK FAILED!");
-
-        carImage.onload = () => console.log("CAR LOADED!");
-        carImage.onerror = () => console.log("CAR FAILED!");   
-
         carImage.src = 'CAR.png';
         trackImage.src = 'Racing%20Track.png';   
 
@@ -320,7 +314,7 @@
         const acceleration = 7.7;
         let max_forward_speed = 0;
         const max_reverse_speed = 2;
-        let friction = 0.98;
+        const friction = 0.98;
 
         // Unified control state mapping
         const controls = {
@@ -346,9 +340,7 @@
         });
 
         window.addEventListener('keyup', (e) => {
-            if (e.key === 'w' || e.key === 'W') {
-            controls.forward = false;
-            friction = 0.75; }
+            if (e.key === 'w' || e.key === 'W') controls.foward = false;
             if (e.key === 's' || e.key === 'S') controls.reverse = false;
             if (e.key === 'a' || e.key === 'A') controls.left = false;
             if (e.key === 'd' || e.key === 'D') controls.right = false;
