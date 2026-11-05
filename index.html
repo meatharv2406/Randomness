@@ -294,10 +294,10 @@
         // LOAD GAME IMAGES
         // =====================
         const trackImage = new Image();
-        const carImage = new Image();
+        trackImage.src = 'Racing%20Track.png'; 
 
-        carImage.src = 'CAR.png';
-        trackImage.src = 'Racing%20Track.png';   
+        const carImage = new Image();
+        carImage.src = 'CAR.png'; 
 
         // =====================
         // CAR & GAME VARIABLES
@@ -340,7 +340,7 @@
         });
 
         window.addEventListener('keyup', (e) => {
-            if (e.key === 'w' || e.key === 'W') controls.foward = false;
+            if (e.key === 'w' || e.key === 'W') controls.forward = false;
             if (e.key === 's' || e.key === 'S') controls.reverse = false;
             if (e.key === 'a' || e.key === 'A') controls.left = false;
             if (e.key === 'd' || e.key === 'D') controls.right = false;
@@ -464,15 +464,12 @@
             }
 
             drawCar(car_x, car_y, angle);
-            
-};
+
             setTimeout(() => {
                 requestAnimationFrame(gameLoop);
             }, 1000 / 15);
-        
+        }
 
         // Boot system loop directly
         gameLoop();
     </script>
-</body>
-</html>
