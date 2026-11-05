@@ -339,7 +339,7 @@
             if (e.key === 'ArrowDown') shiftGear(-1);
         });
 
-        window.addEventListener('keyup', (e) => 
+        window.addEventListener('keyup', (e) => {
             if (e.key === 'w' || e.key === 'W') {
             controls.forward = false;
             friction = 0.75; }
