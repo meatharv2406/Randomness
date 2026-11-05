@@ -329,7 +329,9 @@
         // KEYBOARD LISTENERS (Fixed Crashes)
         // =====================
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'w' || e.key === 'W') controls.forward = true;
+            if (e.key === 'w' || e.key === 'W') {
+                controls.forward = true;
+                friction = 0.98; }
             if (e.key === 's' || e.key === 'S') controls.reverse = true;
             if (e.key === 'a' || e.key === 'A') controls.left = true;
             if (e.key === 'd' || e.key === 'D') controls.right = true;
@@ -340,7 +342,9 @@
         });
 
         window.addEventListener('keyup', (e) => {
-            if (e.key === 'w' || e.key === 'W') controls.forward = false;
+            if (e.key === 'w' || e.key === 'W') {
+                controls.forward = false;
+                friction = 0.75 }
             if (e.key === 's' || e.key === 'S') controls.reverse = false;
             if (e.key === 'a' || e.key === 'A') controls.left = false;
             if (e.key === 'd' || e.key === 'D') controls.right = false;
