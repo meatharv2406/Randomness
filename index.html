@@ -294,10 +294,16 @@
         // LOAD GAME IMAGES
         // =====================
         const trackImage = new Image();
-        trackImage.src = 'Racing%20Track.png'; 
-
         const carImage = new Image();
-        carImage.src = 'CAR.png'; 
+
+        trackImage.onload = () => console.log("TRACK LOADED!");
+        trackImage.onerror = () => console.log("TRACK FAILED!");
+
+        carImage.onload = () => console.log("CAR LOADED!");
+        carImage.onerror = () => console.log("CAR FAILED!");   
+
+        carImage.src = 'CAR.png';
+        trackImage.src = 'Racing%20Track.png';   
 
         // =====================
         // CAR & GAME VARIABLES
