@@ -329,9 +329,7 @@
         // KEYBOARD LISTENERS (Fixed Crashes)
         // =====================
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'w' || e.key === 'W') {
-                controls.forward = true
-                friction = 0.98 };
+            if (e.key === 'w' || e.key === 'W') controls.forward = true;
             if (e.key === 's' || e.key === 'S') controls.reverse = true;
             if (e.key === 'a' || e.key === 'A') controls.left = true;
             if (e.key === 'd' || e.key === 'D') controls.right = true;
@@ -380,8 +378,7 @@
                         controls[ctrl] = true;
                     }
                 }
-            }
-            friction = controls.forward ? 0.98 : 0.75;
+            }
         }
 
         const touchArea = document.getElementById('touch-controls');
